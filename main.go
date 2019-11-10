@@ -4,12 +4,12 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"k8s-leader-election/pkg/election"
+	v1 "k8s.io/api/core/v1"
 	"k8s.io/client-go/tools/leaderelection"
 	"net/http"
 	"os"
 	"time"
-	v1 "k8s.io/api/core/v1"
-	"k8s-leader-election/pkg/election"
 
 	log "github.com/sirupsen/logrus"
 	flag "github.com/spf13/pflag"
@@ -21,15 +21,15 @@ var (
 	flags = flag.NewFlagSet(
 		`elector --election=<name>`,
 		flag.ExitOnError)
-	name      = flags.String("election", "", "The name of the election")
-	id        = flags.String("id", "", "The id of this participant")
-	ttl       = flags.Duration("ttl", 10*time.Second, "The TTL for this election")
-	kubeconfigFile     = flags.String("kubeconfig", "", "Specifies path to kubeconfig file. This must be specified when not running inside a Kubernetes pod.")
-	masterURL           = flags.String("masterUrl", "", "Kubernetes master endpoint")
-	addr      = flags.String("http", "", "If non-empty, stand up a simple webserver that reports the leader state")
-	namespace = flags.String("election-namespace", v1.NamespaceDefault, "The Kubernetes namespace for this election")
-	leader = &LeaderData{}
-	isleader = false
+	name           = flags.String("election", "", "The name of the election")
+	id             = flags.String("id", "", "The id of this participant")
+	ttl            = flags.Duration("ttl", 10*time.Second, "The TTL for this election")
+	kubeconfigFile = flags.String("kubeconfig", "", "Specifies path to kubeconfig file. This must be specified when not running inside a Kubernetes pod.")
+	masterURL      = flags.String("masterUrl", "", "Kubernetes master endpoint")
+	addr           = flags.String("http", "", "If non-empty, stand up a simple webserver that reports the leader state")
+	namespace      = flags.String("election-namespace", v1.NamespaceDefault, "The Kubernetes namespace for this election")
+	leader         = &LeaderData{}
+	isleader       = false
 )
 
 func makeClient() (*kubernetes.Clientset, error) {
@@ -60,7 +60,7 @@ func webHandler(res http.ResponseWriter, _ *http.Request) {
 }
 
 func leaderTestHandler(res http.ResponseWriter, _ *http.Request) {
-	if isleader  {
+	if isleader {
 		res.WriteHeader(http.StatusOK)
 	} else {
 		res.WriteHeader(http.StatusLocked)

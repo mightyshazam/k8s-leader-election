@@ -52,11 +52,11 @@ func NewElection(electionId, id, namespace string, ttl time.Duration, callback f
 
 	l := &resourcelock.EndpointsLock{
 		EndpointsMeta: metav1.ObjectMeta{
-			Name:                       electionId,
-			Namespace:                  namespace,
+			Name:      electionId,
+			Namespace: namespace,
 		},
-		Client:        c.CoreV1(),
-		LockConfig:    resourcelock.ResourceLockConfig{
+		Client: c.CoreV1(),
+		LockConfig: resourcelock.ResourceLockConfig{
 			Identity:      id,
 			EventRecorder: recorder,
 		},
@@ -93,7 +93,7 @@ func NewElection(electionId, id, namespace string, ttl time.Duration, callback f
 
 // RunElection runs an election given an leader elector.  Doesn't return.
 func RunElection(e *leaderelection.LeaderElector, ctx context.Context) {
-	wait.Forever(func () {
+	wait.Forever(func() {
 		e.Run(ctx)
 	}, 0)
 }
